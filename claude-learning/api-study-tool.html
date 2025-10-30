@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Types Study Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .api-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .api-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .api-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .api-card .description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .api-card .details {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+        }
+
+        .api-card.expanded .details {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 15px;
+        }
+
+        .detail-section h3 {
+            color: #764ba2;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .detail-section ul {
+            margin-left: 20px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .detail-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .comparison-table {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background: #f4f4f4;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            background: #e8e8e8;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e8eaff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .submit-btn {
+            padding: 12px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .score {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .expand-hint {
+            color: #999;
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 API Types Study Tool</h1>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('overview')">Overview</button>
+            <button class="mode-btn" onclick="switchMode('comparison')">Comparison</button>
+            <button class="mode-btn" onclick="switchMode('quiz')">Quiz</button>
+        </div>
+
+        <!-- Overview Mode -->
+        <div id="overview" class="content-section active">
+            <div class="api-grid">
+                <!-- REST API -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>REST API</h2>
+                    <p class="description">Representational State Transfer - the most popular architectural style for web APIs</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>Uses standard HTTP methods (GET, POST, PUT, DELETE)</li>
+                                <li>Stateless communication</li>
+                                <li>Resource-based URLs</li>
+                                <li>Returns data in JSON or XML</li>
+                                <li>Cacheable responses</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Public-facing web services</li>
+                                <li>Mobile applications</li>
+                                <li>Microservices architecture</li>
+                                <li>CRUD operations on resources</li>
+                                <li>When simplicity and scalability are priorities</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li><code>GET /api/users/123</code> - Retrieve user data</li>
+                                <li><code>POST /api/users</code> - Create new user</li>
+                                <li><code>PUT /api/users/123</code> - Update user</li>
+                                <li><code>DELETE /api/users/123</code> - Delete user</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GraphQL -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>GraphQL</h2>
+                    <p class="description">A query language for APIs that allows clients to request exactly the data they need</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>Single endpoint for all requests</li>
+                                <li>Client specifies exactly what data to return</li>
+                                <li>Strongly typed schema</li>
+                                <li>Reduces over-fetching and under-fetching</li>
+                                <li>Supports real-time updates with subscriptions</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Complex data requirements with nested resources</li>
+                                <li>Mobile apps with bandwidth constraints</li>
+                                <li>Applications needing flexible data queries</li>
+                                <li>Rapid frontend development</li>
+                                <li>When you want to avoid multiple API calls</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li>Query: <code>{ user(id: 123) { name, email, posts { title } } }</code></li>
+                                <li>Returns only the requested fields in a single request</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOAP -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>SOAP</h2>
+                    <p class="description">Simple Object Access Protocol - a protocol for exchanging structured information</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>XML-based messaging protocol</li>
+                                <li>Built-in error handling (SOAP faults)</li>
+                                <li>WS-Security for enterprise security</li>
+                                <li>ACID compliance support</li>
+                                <li>Strict standards and contracts (WSDL)</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Enterprise applications requiring high security</li>
+                                <li>Financial transactions and payment systems</li>
+                                <li>Legacy system integration</li>
+                                <li>When ACID compliance is required</li>
+                                <li>Formal contracts between services</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li>Banking systems, telecom services</li>
+                                <li>Requires more bandwidth due to XML verbosity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- gRPC -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>gRPC</h2>
+                    <p class="description">Google Remote Procedure Call - high-performance RPC framework using Protocol Buffers</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>Uses HTTP/2 for transport</li>
+                                <li>Binary serialization with Protocol Buffers</li>
+                                <li>Bidirectional streaming support</li>
+                                <li>Language-agnostic with code generation</li>
+                                <li>Extremely fast and efficient</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Microservices communication</li>
+                                <li>Real-time streaming applications</li>
+                                <li>IoT and mobile-to-backend communication</li>
+                                <li>High-performance, low-latency requirements</li>
+                                <li>Polyglot environments needing type safety</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li>Internal service-to-service calls</li>
+                                <li>Up to 10x faster than REST in some scenarios</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WebSocket -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>WebSocket</h2>
+                    <p class="description">Full-duplex communication protocol for real-time bidirectional data flow</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>Persistent connection between client and server</li>
+                                <li>Real-time bidirectional communication</li>
+                                <li>Low latency and overhead</li>
+                                <li>Server can push data to clients</li>
+                                <li>Starts as HTTP then upgrades to WebSocket</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Chat applications and messaging</li>
+                                <li>Live notifications and feeds</li>
+                                <li>Collaborative editing tools</li>
+                                <li>Online gaming</li>
+                                <li>Real-time dashboards and monitoring</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li>Slack, Discord - instant messaging</li>
+                                <li>Stock tickers and trading platforms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webhook -->
+                <div class="api-card" onclick="toggleCard(this)">
+                    <h2>Webhook</h2>
+                    <p class="description">Event-driven HTTP callbacks that notify your application when events occur</p>
+                    <p class="expand-hint">Click to expand...</p>
+                    <div class="details">
+                        <div class="detail-section">
+                            <h3>Key Characteristics:</h3>
+                            <ul>
+                                <li>Push-based (server sends to client)</li>
+                                <li>Event-driven architecture</li>
+                                <li>Simple HTTP POST requests</li>
+                                <li>No need for constant polling</li>
+                                <li>Typically one-way communication</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Best Used For:</h3>
+                            <ul>
+                                <li>Payment processing notifications (Stripe, PayPal)</li>
+                                <li>CI/CD pipeline triggers (GitHub, GitLab)</li>
+                                <li>Third-party service integrations</li>
+                                <li>Event notifications without polling</li>
+                                <li>Automating workflows based on events</li>
+                            </ul>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Example:</h3>
+                            <ul>
+                                <li>GitHub sends webhook when code is pushed</li>
+                                <li>Stripe notifies when payment succeeds/fails</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Mode -->
+        <div id="comparison" class="content-section">
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Type</th>
+                            <th>Protocol</th>
+                            <th>Data Format</th>
+                            <th>Performance</th>
+                            <th>Complexity</th>
+                            <th>Primary Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>REST</strong></td>
+                            <td>HTTP/HTTPS</td>
+                            <td>JSON, XML</td>
+                            <td>Good</td>
+                            <td>Low</td>
+                            <td>General web services, public APIs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GraphQL</strong></td>
+                            <td>HTTP/HTTPS</td>
+                            <td>JSON</td>
+                            <td>Good</td>
+                            <td>Medium</td>
+                            <td>Flexible data queries, mobile apps</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SOAP</strong></td>
+                            <td>HTTP, SMTP, TCP</td>
+                            <td>XML</td>
+                            <td>Moderate</td>
+                            <td>High</td>
+                            <td>Enterprise systems, high security</td>
+                        </tr>
+                        <tr>
+                            <td><strong>gRPC</strong></td>
+                            <td>HTTP/2</td>
+                            <td>Protocol Buffers</td>
+                            <td>Excellent</td>
+                            <td>Medium-High</td>
+                            <td>Microservices, high-performance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>WebSocket</strong></td>
+                            <td>WebSocket (WS/WSS)</td>
+                            <td>Text/Binary</td>
+                            <td>Excellent</td>
+                            <td>Medium</td>
+                            <td>Real-time bidirectional communication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Webhook</strong></td>
+                            <td>HTTP/HTTPS</td>
+                            <td>JSON, XML</td>
+                            <td>Good</td>
+                            <td>Low</td>
+                            <td>Event notifications, integrations</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quiz Mode -->
+        <div id="quiz" class="content-section">
+            <div class="quiz-container">
+                <div class="question" data-answer="0">
+                    <h3>1. Which API type is best for building a real-time chat application?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">WebSocket</div>
+                        <div class="option" data-index="1">REST</div>
+                        <div class="option" data-index="2">SOAP</div>
+                        <div class="option" data-index="3">Webhook</div>
+                    </div>
+                </div>
+
+                <div class="question" data-answer="1">
+                    <h3>2. Which API allows clients to request exactly the data they need?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">REST</div>
+                        <div class="option" data-index="1">GraphQL</div>
+                        <div class="option" data-index="2">gRPC</div>
+                        <div class="option" data-index="3">SOAP</div>
+                    </div>
+                </div>
+
+                <div class="question" data-answer="2">
+                    <h3>3. What's the best choice for enterprise banking systems requiring ACID compliance?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">REST</div>
+                        <div class="option" data-index="1">WebSocket</div>
+                        <div class="option" data-index="2">SOAP</div>
+                        <div class="option" data-index="3">Webhook</div>
+                    </div>
+                </div>
+
+                <div class="question" data-answer="3">
+                    <h3>4. Which API type is ideal for high-performance microservices communication?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">REST</div>
+                        <div class="option" data-index="1">GraphQL</div>
+                        <div class="option" data-index="2">SOAP</div>
+                        <div class="option" data-index="3">gRPC</div>
+                    </div>
+                </div>
+
+                <div class="question" data-answer="0">
+                    <h3>5. Which is best for receiving payment notifications from Stripe?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">Webhook</div>
+                        <div class="option" data-index="1">WebSocket</div>
+                        <div class="option" data-index="2">gRPC</div>
+                        <div class="option" data-index="3">GraphQL</div>
+                    </div>
+                </div>
+
+                <div class="question" data-answer="0">
+                    <h3>6. What's the most popular API style for public web services?</h3>
+                    <div class="options">
+                        <div class="option" data-index="0">REST</div>
+                        <div class="option" data-index="1">SOAP</div>
+                        <div class="option" data-index="2">gRPC</div>
+                        <div class="option" data-index="3">WebSocket</div>
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+                <div class="score" id="score"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userAnswers = {};
+
+        function switchMode(mode) {
+            // Update buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(mode).classList.add('active');
+
+            // Reset quiz if switching to quiz mode
+            if (mode === 'quiz') {
+                resetQuiz();
+            }
+        }
+
+        function toggleCard(card) {
+            card.classList.toggle('expanded');
+        }
+
+        // Quiz functionality
+        document.querySelectorAll('.question').forEach(question => {
+            question.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove previous selection
+                    question.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    // Add selection to clicked option
+                    this.classList.add('selected');
+
+                    // Store answer
+                    const questionIndex = Array.from(document.querySelectorAll('.question')).indexOf(question);
+                    userAnswers[questionIndex] = parseInt(this.getAttribute('data-index'));
+                });
+            });
+        });
+
+        function submitQuiz() {
+            const questions = document.querySelectorAll('.question');
+            let correct = 0;
+
+            questions.forEach((question, index) => {
+                const correctAnswer = parseInt(question.getAttribute('data-answer'));
+                const userAnswer = userAnswers[index];
+                const options = question.querySelectorAll('.option');
+
+                options.forEach(option => {
+                    const optionIndex = parseInt(option.getAttribute('data-index'));
+
+                    if (optionIndex === correctAnswer) {
+                        option.classList.add('correct');
+                    }
+
+                    if (userAnswer !== undefined && optionIndex === userAnswer && userAnswer !== correctAnswer) {
+                        option.classList.add('incorrect');
+                    }
+                });
+
+                if (userAnswer === correctAnswer) {
+                    correct++;
+                }
+            });
+
+            const score = document.getElementById('score');
+            const percentage = Math.round((correct / questions.length) * 100);
+            score.textContent = `Score: ${correct}/${questions.length} (${percentage}%)`;
+
+            // Disable submit button
+            document.querySelector('.submit-btn').disabled = true;
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+            document.getElementById('score').textContent = '';
+            document.querySelector('.submit-btn').disabled = false;
+        }
+    </script>
+</body>
+</html>
