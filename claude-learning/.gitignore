@@ -1,0 +1,108 @@
+# ============================================
+# BMad Framework Files
+# ============================================
+# Exclude the entire BMad core installation
+# This is similar to node_modules - it can be reinstalled
+.bmad-core/
+
+# ============================================
+# Claude Code Configuration
+# ============================================
+# Exclude personal Claude Code settings
+# (each developer should have their own)
+.claude/settings.local.json
+
+# Keep .claude/commands/ in version control
+# so the team can share custom commands
+
+# ============================================
+# AI/Development Logs
+# ============================================
+# BMad debug logs (configured in core-config.yaml)
+.ai/debug-log.md
+.ai/*.log
+
+# ============================================
+# macOS System Files
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs (IntelliJ, WebStorm, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# Logs and Temporary Files
+# ============================================
+*.log
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# ============================================
+# Environment and Secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# ============================================
+# Build outputs (if applicable)
+# ============================================
+dist/
+build/
+*.out
